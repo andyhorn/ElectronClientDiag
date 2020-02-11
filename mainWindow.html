@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Red Giant Client Diagnostics</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>    
+</head>
+<body class="grey lighten-5">
+    <nav>
+        <div class="nav-wrapper red darken-2">
+            <a class="brand-logo center">Red Giant Client Diag</a>
+        </div>
+    </nav>
+    <div class="container">
+        <h4>Port Scan</h4>
+        <form>
+            <div class="row">
+                <div class="col s12 ">
+                    <label for="host">Host Address</label>
+                    <input type="text" name="host" id="host" required autofocus>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col s4">
+                    <label for="port-cc">Client Port</label>
+                    <input id="port-cc" class="port-input px-1" name="port-cc" type="text" value="5053">
+                </div>
+                <div class="col s4">
+                    <label for="port-web">Web GUI Port</label>
+                    <input type="text" class="port-input px-1" name="port-web" id="port-web" value="5054">
+                </div>
+                <div class="col s4">
+                    <label for="port-isv">ISV Port</label>
+                    <input type="text" class="port-input px-1" name="port-isv" id="port-isv">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col s12">
+                    <button class="btn" type="submit">Scan</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <script>
+        const electron = require('electron')
+        const { app, ipcRenderer } = electron
+        const Net = require('net')
+        const ports = document.querySelectorAll('input.port-input')
+        const host = document.getElementById('host')
+        const form = document.querySelector('form')
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault()
+
+            for (let port of ports) {
+                port.className = 'px-1'
+            }
+
+            for (let port of ports) {
+                console.log(port)
+                if (port.value) {
+                    testPort(port, host.value)
+                }
+            }
+        })
+
+        function testPort(port, host) {
+            console.log('testing port ' + port.value + 'on host ' + host)
+            let passed
+            let socket = new Net.Socket()
+            socket.setTimeout(3000)
+            socket.on('connect', () => {
+                console.log('port success')
+                passed = true
+                socket.end()
+            })
+            socket.on('timeout', () => {
+                console.log('port timeout')
+                passed = false
+                socket.destroy()
+            })
+            socket.on('error', () => {
+                console.log('port error')
+                passed = false
+                socket.end()
+            })
+            socket.on('close', () => {
+                port.classList.add(passed ? 'green' : 'red')
+                port.classList.add('white-text')
+            })
+
+            socket.connect(port.value, host)
+        }
+    </script>
+</body>
+</html>
