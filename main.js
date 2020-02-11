@@ -30,3 +30,23 @@ function createMainWindow() {
 app.on('ready', () => {
     createMainWindow()
 })
+
+ipcMain.on('license:test', (e, data) => {
+    let address = data.address,
+        port = data.port
+
+    console.log(data)
+    console.log(address)
+    console.log(port)
+
+    mainWindow.webContents.loadURL(url.format({
+        pathname: path.join(__dirname, 'portScan.html'),
+        protocol: 'file:',
+        slashes: true
+    }))
+
+    mainWindow.webContents.once('did-finish-load', () => {
+        console.log('window ready')
+        mainWindow.webContents.send('license:test', data)
+    })
+})

@@ -47,3 +47,9 @@ function testPort(port, host) {
 
     socket.connect(port.value, host)
 }
+
+ipcRenderer.on('license:test', (e, data) => {
+    console.log('message received')
+    host.value = data.address
+    document.getElementById('port-cc').value = data.port
+})
