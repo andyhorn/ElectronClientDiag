@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Red Giant Client Diagnostics</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <!-- Compiled and minified Materialize CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <!-- Compiled and minified Materialize JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <nav class="nav-extended">
+        <div class="nav-wrapper red darken-2">
+            <a class="brand-logo center">Red Giant Client Diag</a>
+        </div>
+        <div class="nav-content">
+            <ul class="tabs tabs-transparent">
+                <li class="tab"><a href="portScan.html">Port Scan</a></li>
+                <li class="tab"><a href="licenseScan.html">Client License Scan</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="row pt-5">
+            <div class="col s12 center">
+                <button id="scan-button" class="waves-effect waves-light btn-large"><i class="material-icons right">folder_open</i>Scan</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col s12">
+                <p id="folder-present"></p>
+                <p id="folder-spelling"></p>
+                <p id="license-present"></p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col s12">
+                <p id="content-header"></p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col s3">
+                <p id="host"></p>
+            </div>
+            <div class="col s3">
+                <p id="address"></p>
+            </div>
+            <div class="col s3">
+                <p id="any"></p>
+            </div>
+            <div class="col s3">
+                <p id="port"></p>
+            </div>
+        </div>
+    </div>
+    <script src="assets/js/license-scan.js"></script>
+</body>
+</html>

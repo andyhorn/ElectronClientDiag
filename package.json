@@ -1,10 +1,14 @@
 {
   "name": "electronclientdiagnostic",
+  "productName": "Red Giant Client Diagnostics",
   "version": "1.0.0",
   "description": "Red Giant Client-side Diagnostics",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "package-mac": "electron-packager . --overwrite --platform=darwin --arch=x64 --icon=assets/icons/mac/icon.icns --prune=true --out=release-builds",
+    "package-win": "electron-packager . electronclientdiagnostic --overwrite --platform=win32 --arch=ia32 --icon=assets/icons/win/icon.ico --prune=true --out=release-builds --version-string.ProductName=\"Red Giant Client Diagnostics\"",
+    "package-linux": "electron-packager . electronclientdiagnostic --overwrite --platform=linux --arch=x64 --icon=assets/icons/png/icon.png --prune=true --out=release-builds"
   },
   "author": "Andy Horn",
   "license": "ISC",
