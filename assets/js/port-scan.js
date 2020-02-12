@@ -50,6 +50,6 @@ function testPort(port, host) {
 
 ipcRenderer.on('license:test', (e, data) => {
     console.log('message received')
-    host.value = data.address
+    host.value = data.host
     document.getElementById('port-cc').value = data.port
 })

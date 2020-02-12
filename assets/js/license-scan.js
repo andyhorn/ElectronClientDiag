@@ -2,8 +2,6 @@ const electron = require('electron')
 const { ipcRenderer } = electron
 const fs = require('fs')
 const path = require('path')
-// const re = require('regex')
-// const platform = process.platform
 
 var folderCol, licenseCol, folderResultsList, licenseResultsList
 
@@ -40,55 +38,23 @@ function createHeaders() {
 
 function createFolderResultsList() {
     let folderResultsDiv = document.createElement('div')
+
     folderResultsList = document.createElement('ul')
-    let folderPresentItem = document.createElement('li')
-
     folderResultsList.classList.add('collection')
-    // folderPresentItem.classList.add('collection-item')
-    // folderPresentItem.id = 'folder-present'
 
-    // folderResultsList.appendChild(folderPresentItem)
     folderResultsDiv.appendChild(folderResultsList)
     folderCol.appendChild(folderResultsDiv)
 }
 
 function createLicenseResultsList() {
     let licenseResultsDiv = document.createElement('div')
-    licenseResultsList = document.createElement('ul')
-    let licensePresentItem = document.createElement('li')
 
+    licenseResultsList = document.createElement('ul')
     licenseResultsList.classList.add('collection')
-    // licensePresentItem.classList.add('collection-item')
-    // licensePresentItem.id = 'license-present'
 
     licenseResultsDiv.appendChild(licenseResultsList)
-    // licenseResultsList.appendChild(licensePresentItem)
     licenseCol.appendChild(licenseResultsDiv)
 }
-
-// function setFolderExists(exists) {
-//     let listItem = document.getElementById('folder-present')
-    
-//     if (exists) {
-//         listItem.textContent = 'Present!'
-//         listItem.classList.add('green-text')
-//     } else {
-//         listItem.textContent = 'Not found!'
-//         listItem.classList.add('red-text')
-//     }
-// }
-
-// function setLicenseExists(exists) {
-//     let listItem = document.getElementById('license-present')
-
-//     if (exists) {
-//         listItem.textContent = 'Present!'
-//         listItem.classList.add('green-text')
-//     } else {
-//         listItem.textContent = 'Not found!'
-//         listItem.classList.add('red-text')
-//     }
-// }
 
 function getPlatform() {
     return process.platform
@@ -184,86 +150,72 @@ function getLicenseDirPath() {
     return directoryPath
 }
 
+function makeTableRow(headerText, contentText) {
+    let row = document.createElement('tr')
+    let header = document.createElement('th')
+    let content = document.createElement('td')
+
+    header.textContent = headerText
+    content.textContent = contentText
+
+    row.appendChild(header)
+    row.appendChild(content)
+
+    return row
+}
+
+function makeBorderlessTable() {
+    let table = document.createElement('table')
+    table.classList.add('table')
+    table.classList.add('table-borderless')
+    return table
+}
+
+function makeTestButton(host, port) {
+    let button = document.createElement('button')
+    button.classList.add('btn-small')
+    button.classList.add('waves-effect')
+    button.classList.add('right')
+
+    button.setAttribute('data-host', host)
+    button.setAttribute('data-port', port)
+
+    button.textContent = "Test"
+
+    button.addEventListener('click', (e) => {
+        let data = { host, port }
+        ipcRenderer.send('license:test', data)
+    })
+
+    return button
+}
+
 function displayLicenseContents(license) {
     let listItem = document.createElement('li')
     listItem.classList.add('collection-item')
     listItem.classList.add('left-align')
 
-    let table = document.createElement('table')
-    table.classList.add('table')
+    let table = makeBorderlessTable()
     listItem.appendChild(table)
 
-    // let header = document.createElement('div')
-    let fileRow = document.createElement('tr')
-    let fileHeader = document.createElement('th')
-    fileHeader.textContent = 'File'
+    let filename = license.name.split(path.sep)[license.name.split(path.sep).length - 1]
+    let fileRow = makeTableRow('File', filename)
+    let addressRow = makeTableRow('Address', license.host)
+    let portRow = makeTableRow('RLM Port', license.port)
 
-    let fileContent = document.createElement('td')
-    fileContent.textContent = license.name.split(path.sep)[license.name.split(path.sep).length - 1]
-
-    fileRow.appendChild(fileHeader)
-    fileRow.appendChild(fileContent)
     table.appendChild(fileRow)
-    // header.innerHTML = '<strong>File: </strong>' + license.name
-
-    // let address = document.createElement('div')
-    // address.innerHTML = '<strong>Address: </strong>' + license.host
-
-    let addressRow = document.createElement('tr')
-    let addressHeader = document.createElement('th')
-    let addressContent = document.createElement('td')
-
-    addressHeader.textContent = 'Address'
-    addressContent.textContent = license.host
-
-    addressRow.appendChild(addressHeader)
-    addressRow.appendChild(addressContent)
     table.appendChild(addressRow)
-
-    // let port = document.createElement('div')
-    // port.innerHTML = '<strong>Port: </strong>' + license.port
-
-    let portRow = document.createElement('tr')
-    let portHeader = document.createElement('th')
-    let portContent = document.createElement('td')
-
-    portHeader.textContent = 'RLM Port'
-    portContent.textContent = license.port
-
-    portRow.appendChild(portHeader)
-    portRow.appendChild(portContent)
     table.appendChild(portRow)
 
-    let testButton = document.createElement('button')
-    testButton.classList.add('btn-small')
-    testButton.classList.add('waves-effect')
-    testButton.classList.add('waves-light')
-    testButton.classList.add('right')
-    testButton.setAttribute('data-host', license.host)
-    testButton.setAttribute('data-port', license.port)
-    testButton.textContent = "Test"
+    let testButton = makeTestButton(license.host, license.port)
 
-    testButton.addEventListener('click', (e) => {
-        console.log(e)
-        let data = {
-            address: e.target.dataset['host'],
-            port: e.target.dataset['port']
-        }
-
-        console.log(data)
-        ipcRenderer.send('license:test', data)
-    })
-
-    // listItem.appendChild(header)
-    // listItem.appendChild(address)
-    // listItem.appendChild(port)
     listItem.appendChild(testButton)
 
     if (license.name.endsWith('config')) {
         let warning = document.createElement('div')
         warning.innerHTML = '<strong>Warning: </strong>".config" files may not be supported, please change to ".lic"'
         warning.classList.add('red-text')
-        warning.classList.add('center')
+        warning.classList.add('px-2')
         listItem.appendChild(warning)
     }
 
@@ -277,6 +229,8 @@ function addListItem(column, message, color) {
     let content = document.createElement('p')
     content.textContent = message
     content.classList.add(color)
+    content.classList.add('mx-auto')
+    content.classList.add('my-0')
 
     listItem.appendChild(content)
 
@@ -284,6 +238,24 @@ function addListItem(column, message, color) {
         folderResultsList.appendChild(listItem)
     } else if (column == 'file') {
         licenseResultsList.appendChild(listItem)
+    }
+}
+
+function displayLicenses(dirPath, licenseList) {
+    if (licenseList.length) {
+        console.log(licenseList.length)
+        if (licenseList.length > 1) {
+            addListItem('file', 'Multiple license files found; This may cause conflicts.', 'red-text')
+        } else {
+            addListItem('file', 'Single license file found; No chance of conflicts.', 'green-text')
+        }
+
+        for (let license of licenseList) {
+            let values = readLicenseFile(path.join(dirPath, license))
+            displayLicenseContents(values)
+        }
+    } else {
+        addListItem('file', 'No license file found!', 'red-text')
     }
 }
 
@@ -301,14 +273,15 @@ document.getElementById('scan-button').addEventListener('click', () => {
     // If the directory exists...
     if (licenseDirExists()) {
 
+        // Set the success message
+        addListItem('folder', 'Folder present!', 'green-text')
+
         if (!checkFolderCase()) {
             console.log('capital L detected')
             addListItem('folder', 'Capital L detected in "licenses" folder; Please use all lowercase', 'red-text')
+        } else {
+            addListItem('folder', 'Folder spelling and capitalization correct!', 'green-text')
         }
-
-        // Set the success message
-        // setFolderExists(true)
-        addListItem('folder', 'Folder present!', 'green-text')
 
         // Get the directory path
         let directoryPath = getLicenseDirPath()
@@ -320,15 +293,16 @@ document.getElementById('scan-button').addEventListener('click', () => {
         if (exists) {
 
             // Set the success message
-            // setLicenseExists(true)
             addListItem('file', 'License file present!', 'green-text')
 
             // Read the licenses and display their contents
             let licenses = getLicenseFiles()
-            for (let license of licenses) {
-                let values = readLicenseFile(path.join(directoryPath, license))
-                displayLicenseContents(values)
-            }
+
+            displayLicenses(getLicenseDirPath(), licenses)
+            // for (let license of licenses) {
+            //     let values = readLicenseFile(path.join(directoryPath, license))
+            //     displayLicenseContents(values)
+            // }
 
         } else {
             // setLicenseExists(false)
@@ -342,7 +316,6 @@ document.getElementById('scan-button').addEventListener('click', () => {
             // Otherwise, set the failure message
             addListItem('folder', '"licenses" directory not found!', 'red-text')
             addListItem('file', 'License file not found!', 'red-text')
-
         } else {
             // Licenses folder exists, but is spelled incorrectly
             console.log('folder spelled incorrectly')
@@ -351,14 +324,22 @@ document.getElementById('scan-button').addEventListener('click', () => {
             console.log(dirPath)
             let contents = fs.readdirSync(dirPath).filter(f => f.endsWith('.lic') || f.endsWith('.config'))
 
-            if (contents.length) {
-                for (let license of contents) {
-                    let values = readLicenseFile(path.join(dirPath, license))
-                    displayLicenseContents(values)
-                }
-            } else {
-                addListItem('file', 'No license file found!', 'red-text')
-            }
+            displayLicenses(dirPath, contents)
+            // if (contents.length) {
+            //     console.log(contents.length)
+            //     if (contents.length > 1) {
+            //         addListItem('file', 'Multiple license files found; This may cause conflicts.', 'red-text')
+            //     } else {
+            //         addListItem('file', 'Single license file found; No chance of conflicts.', 'green-text')
+            //     }
+
+            //     for (let license of contents) {
+            //         let values = readLicenseFile(path.join(dirPath, license))
+            //         displayLicenseContents(values)
+            //     }
+            // } else {
+            //     addListItem('file', 'No license file found!', 'red-text')
+            // }
             console.log(spelling)
         }
     }
