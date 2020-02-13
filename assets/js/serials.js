@@ -8,6 +8,12 @@ const resultsDiv = document.getElementById('results')
 var resultsTable, statusItem
 
 function displaySysInfo() {
+    if (resultsTable) {
+        resultsDiv.innerHTML = ''
+        resultsTable = null
+        statusItem = null
+    }
+
     let system = process.platform == 'win32' ? 'Windows'
         : process.platform == 'darwin' ? 'macOS'
         : 'Unknown'
@@ -72,14 +78,17 @@ function runRgDeploy() {
     sudoPrompt.exec(command, {
         name: 'Red Giant Client Management'
     }, (err, stdout, stderr) => {
-        if (err) {
-            console.log(err)
+        if (err || stderr) {
+            if (err) {
+                console.log(err)
+            }
+            if (stderr) {
+                console.log(stderr)
+            }
+        } else {
+            console.log(stdout)
+            setStatus('Success!')
         }
-        if (stderr) {
-            console.log(stderr)
-        }
-        console.log(stdout)
-        setStatus('Complete!')
     })
 }
 
