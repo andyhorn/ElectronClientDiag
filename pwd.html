@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <!-- Compiled and minified Materialize CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <!-- Compiled and minified Materialize JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <form class="form">
+            <label for="password">Admin Password</label>
+            <input type="password" name="password" id="password-input" required>
+            <button type="submit" class="btn waves-effect" id="submit-button">Enter</button>
+        </form>
+    </div>
+    <script>
+        const { ipcRenderer } = require('electron')
+        const form = document.querySelector('form')
+        const submitButton = document.getElementById('submit-button')
+
+        submitButton.addEventListener('click', (e) => {
+            e.preventDefault()
+            let password = document.getElementById('password-input').value
+            ipcRenderer.send('password:send', { password })
+        })
+    </script>
+</body>
+</html>

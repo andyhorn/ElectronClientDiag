@@ -3,7 +3,7 @@ const path = require('path')
 const url = require('url')
 const fs = require('fs')
 
-let mainWindow
+let mainWindow, pwdWindow
 
 function createMainWindow() {
     console.log(`${Date.now()} - getting current screen dimensions...`)
@@ -79,4 +79,29 @@ ipcMain.on('license:save', (e, data) => {
     } else {
         console.log(`${Date.now()} - user canceled save process`)
     }
+})
+
+ipcMain.on('password:get', () => {
+    pwdWindow = new BrowserWindow({
+        height: 200,
+        width: 300,
+        show: false,
+        webPreferences: {
+            nodeIntegration: true
+        }
+    })
+
+    pwdWindow.loadURL(url.format({
+        pathname: path.join(__dirname, 'pwd.html'),
+        protocol: 'file:',
+        slashes: true
+    }))
+
+    pwdWindow.once('ready-to-show', () => {
+        pwdWindow.show()
+    })
+})
+
+ipcMain.on('password:send', (e, data) => {
+    mainWindow.webContents.send('password:send', data)
 })

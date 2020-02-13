@@ -1,5 +1,7 @@
 const { exec } = require('child_process')
 const path = require('path')
+const { ipcRenderer } = require('electron')
+const sudoPrompt = require('sudo-prompt')
 
 const removeSerialsButton = document.getElementById('remove-serials-button')
 const resultsDiv = document.getElementById('results')
@@ -57,7 +59,7 @@ function getCommand() {
     if (process.platform == 'win32') {
         return `${deployPath} --removeserials`
     } else {
-        return `sudo ${deployPath} --removeserials`
+        return `chmod +x "${deployPath}" && "${deployPath}" --removeserials`
     }
 }
 
@@ -67,7 +69,9 @@ function runRgDeploy() {
     let command = getCommand()
     console.log(command)
 
-    exec(command, (err, stdout, stderr) => {
+    sudoPrompt.exec(command, {
+        name: 'Red Giant Client Management'
+    }, (err, stdout, stderr) => {
         if (err) {
             console.log(err)
         }
@@ -78,5 +82,18 @@ function runRgDeploy() {
         setStatus('Complete!')
     })
 }
+
+function getPassword() {
+    console.log('asking for password')
+    ipcRenderer.send('password:get')
+}
+
+ipcRenderer.on('password:send', (e, data) => {
+    console.log('password received')
+    console.log(data)
+    pwd = data.password
+    console.log(pwd)
+    runRgDeploy()
+})
 
 removeSerialsButton.addEventListener('click', runRgDeploy)
