@@ -9,7 +9,10 @@
     <!-- Compiled and minified Materialize CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <!-- Compiled and minified Materialize JavaScript -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <!-- Materialize icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/animations.css">
 </head>
 <body class="grey lighten-4">
     <nav class="nav-extended red darken-2">
@@ -17,6 +20,7 @@
             <ul class="tabs tabs-transparent">
                 <li class="tab"><a href="portScan.html">Port Scan</a></li>
                 <li class="tab"><a href="licenseScan.html">Client License Scan</a></li>
+                <li class="tab"><a href="licenseMaker.html">Client License Creator</a></li>
             </ul>
         </div>
     </nav>
@@ -46,8 +50,8 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col s12">
-                    <button class="btn" type="submit">Scan</button>
+                <div id="button-row" class="col s12 d-flex flex-row align-items-center">
+                    <button class="btn" id="scan-button" type="submit">Scan</button>
                 </div>
             </div>
         </form>

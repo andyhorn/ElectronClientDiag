@@ -2,16 +2,19 @@ const electron = require('electron')
 const { ipcRenderer } = electron
 const fs = require('fs')
 const path = require('path')
+const debug = require('./assets/js/debug.js')
 
 var folderCol, licenseCol, folderResultsList, licenseResultsList
 
 const resultsElement = document.getElementById('scan-results')
 
 function clearResults() {
+    debug.log(`[clearResults] clearing DOM of results elements`)
     resultsElement.innerHTML = ''
 }
 
 function createHeaders() {
+    debug.log('[createHeaders] creating headers')
     folderCol = document.createElement('div')
     licenseCol = document.createElement('div')
 
@@ -29,11 +32,13 @@ function createHeaders() {
     let licenseHeaderText = document.createElement('h5')
     licenseHeaderText.textContent = 'License File'
 
+    debug.log(`[createHeaders] headers created, adding to DOM`)
     folderCol.appendChild(folderHeaderText)
     licenseCol.appendChild(licenseHeaderText)
 
     resultsElement.appendChild(folderCol)
     resultsElement.appendChild(licenseCol)
+    debug.log('[createHeaders] headers added to DOM')
 }
 
 function createFolderResultsList() {
@@ -57,88 +62,104 @@ function createLicenseResultsList() {
 }
 
 function getPlatform() {
+    debug.log(`[getPlatform] returning platform ${process.platform}`)
     return process.platform
 }
 
 function licenseDirExists() {
-    let exists, dir_path, platform = getPlatform()
+    let exists, dirPath, platform = getPlatform()
     if (platform == 'win32') {
-        dir_path = path.join('C:', 'ProgramData', 'Red Giant', 'licenses')
-        console.log(dir_path)
-        exists = fs.existsSync(dir_path)
+        dirPath = path.join('C:', 'ProgramData', 'Red Giant', 'licenses')
+        debug.log(`[licenseDirExists] windows platform detected, path set: ${dirPath}`)
+        exists = fs.existsSync(dirPath)
     } else {
-        dir_path = path.join('Users', 'Shared', 'Red Giant', 'licenses')
-        console.log(dir_path)
+        dirPath = path.join('Users', 'Shared', 'Red Giant', 'licenses')
+        debug.log(`[licenseDirExists] *nix platform detected, path set: ${dirPath}`)
         exists = fs.existsSync(dir_path)
     }
-    console.log(exists)
-
+    
+    debug.log(`[licenseDirExists] directory exists? ${exists}`)
     return exists
 }
 
 function getParentDir(fullPath) {
-    return fullPath.split(path.sep).slice(0, -1).join(path.sep)
+    debug.log(`[getParentDir] path supplied: ${fullPath}`)
+    let parentPath = fullPath.split(path.sep).slice(0, -1).join(path.sep)
+    debug.log(`[getParentPath] parent path: ${parentPath}`)
+    return parentPath
 }
 
 function checkFolderCase() {
+    debug.log(`[checkFolderCase] checking for lowercase "licenses" folder`)
     let directoryPath = getLicenseDirPath()
-
     let dir = getParentDir(directoryPath)
-    console.log(dir)
     let contents = fs.readdirSync(dir)
-    console.log(contents)
+    debug.log(`[checkFolderCase] Red Giant directory contents:`)
+    debug.print(contents)
     contents = contents.filter(d => d.includes('icenses'))
-    console.log(contents)
+    debug.log(`[checkFolderCase] filtered contents:`)
+    debug.print(contents)
     return contents[0] === "licenses"
 }
 
 function getLicenseFiles() {
+    debug.log(`[getLicenseFiles] scanning for license files in default location`)
     let directoryPath = getLicenseDirPath()
     let contents = fs.readdirSync(directoryPath)
     
     if (contents.length == 0) {
+        debug.log(`[getLicenseFiles] no files found in default directory`)
         return null
     } else {
-        return contents.filter(i => {
-            return i.endsWith('.lic') || i.endsWith('.config')
-        })
+        contents = contents.filter(i => i.endsWith('.lic') || i.endsWith('.config'))
+        debug.log(`[getLicenseFiles] license files found:`)
+        debug.print(contents)
+        return contents
     }
 }
 
 function licenseFileExists() {
-    return getLicenseFiles != null
+    return getLicenseFiles() != null
 }
 
 function checkSpelling() {
-    console.log('checking alternative spelling...')
+    debug.log('[checkSpelling] checking alternative spelling...')
     let fullPath = getLicenseDirPath()
     let RedGiantDir = getParentDir(fullPath)
 
     let regex = new RegExp('[L|l]i[c|s]en[c|s]es?$')
-    console.log('regex: ' + regex)
+    debug.log('[checkSpelling] license folder regex: ' + regex)
     let dirContents = fs.readdirSync(RedGiantDir)
     let licensesFolder = dirContents.filter(d => regex.test(d))
-
-    console.log(licensesFolder)
+    debug.log(`[checkSpelling] possible folders found:`)
+    debug.print(licensesFolder)
 
     return licensesFolder.length > 0 ? licensesFolder[0] : false
 }
 
-function readLicenseFile(license_path) {
-    let license_contents = fs.readFileSync(license_path, {
+function readLicenseFile(licensePath) {
+    debug.log(`[readLicenseFile] path supplied: ${licensePath}`)
+    let licenseContents = fs.readFileSync(licensePath, {
         encoding: 'utf-8'
     })
-    let license = {},
-        values = license_contents.split(' ')
+    debug.log(`[readLicenseFile] license file read, contents:`)
+    debug.print(licenseContents)
 
-    license.name = license_path
+    let license = {},
+        values = licenseContents.split(' ')
+
+    license.name = licensePath
     license.host = values[1].trim()
     license.port = values[3].trim()
+
+    debug.log(`[readLicenseFile] values parsed:`)
+    debug.print(license)
 
     return license
 }
 
 function getLicenseDirPath() {
+    debug.log(`[getLicenseDirPath] getting directory path for current platform...`)
     let directoryPath
 
     if (process.platform == 'darwin') {
@@ -147,10 +168,12 @@ function getLicenseDirPath() {
         directoryPath = path.join('C:', 'ProgramData', 'Red Giant', 'licenses')
     }
 
+    debug.log(`[getLicenseDirPath] pathway generated: ${directoryPath}`)
     return directoryPath
 }
 
 function makeTableRow(headerText, contentText) {
+    debug.log(`[makeTableRow] generating table row with header "${headerText}" and data "${contentText}"`)
     let row = document.createElement('tr')
     let header = document.createElement('th')
     let content = document.createElement('td')
@@ -161,6 +184,7 @@ function makeTableRow(headerText, contentText) {
     row.appendChild(header)
     row.appendChild(content)
 
+    debug.log(`[makeTableRow] row generated`)
     return row
 }
 
@@ -183,7 +207,10 @@ function makeTestButton(host, port) {
     button.textContent = "Test"
 
     button.addEventListener('click', (e) => {
+        debug.log(`[testButtonListener] button clicked`)
         let data = { host, port }
+        debug.log(`[testButtonListener] sending data:`)
+        debug.print(data)
         ipcRenderer.send('license:test', data)
     })
 
@@ -191,6 +218,9 @@ function makeTestButton(host, port) {
 }
 
 function displayLicenseContents(license) {
+    debug.log(`[displayLicenseContents] generating table for license:`)
+    debug.print(license)
+
     let listItem = document.createElement('li')
     listItem.classList.add('collection-item')
     listItem.classList.add('left-align')
@@ -211,7 +241,10 @@ function displayLicenseContents(license) {
 
     listItem.appendChild(testButton)
 
+    debug.log(`[displayLicenseContents] license data parsed into table`)
+
     if (license.name.endsWith('config')) {
+        debug.log(`[displayLicenseContents] .config file detected, adding warning`)
         let warning = document.createElement('div')
         warning.innerHTML = '<strong>Warning: </strong>".config" files may not be supported, please change to ".lic"'
         warning.classList.add('red-text')
@@ -219,10 +252,12 @@ function displayLicenseContents(license) {
         listItem.appendChild(warning)
     }
 
+    debug.log(`[displayLicenseContents] adding table to DOM`)
     licenseResultsList.appendChild(listItem)
 }
 
 function addListItem(column, message, color) {
+    debug.log(`[addListItem] adding list item to DOM; column: ${column} - message: ${message}`)
     let listItem = document.createElement('li')
     listItem.classList.add('collection-item')
 
@@ -243,7 +278,7 @@ function addListItem(column, message, color) {
 
 function displayLicenses(dirPath, licenseList) {
     if (licenseList.length) {
-        console.log(licenseList.length)
+        debug.log(`[displayLicenses] displaying ${licenseList.length} licenses`)
         if (licenseList.length > 1) {
             addListItem('file', 'Multiple license files found; This may cause conflicts.', 'red-text')
         } else {
@@ -251,96 +286,112 @@ function displayLicenses(dirPath, licenseList) {
         }
 
         for (let license of licenseList) {
+            debug.log(`[displayLicenses] displaying values for license:`)
+            debug.print(license)
             let values = readLicenseFile(path.join(dirPath, license))
             displayLicenseContents(values)
         }
     } else {
+        debug.log(`[displayLicenses] no licenses to display`)
         addListItem('file', 'No license file found!', 'red-text')
     }
 }
 
+function startSpinner() {
+    debug.log('[startSpinner] starting spin animation')
+    let button = document.querySelector('.material-icons.right')
+    button.classList.add('spin')
+}
+
+function stopSpinner() {
+    debug.log('[startSpinner] ending spin animation')
+    let button = document.querySelector('.material-icons.right')
+    button.classList.remove('spin')
+}
+
 document.getElementById('scan-button').addEventListener('click', () => {
+    debug.log(`[scanButtonListener] beginning scan process...`)
+    debug.log('[scanButtonListener] starting spin icon')
+    startSpinner()
+
     // Clear any existing scan information
+    debug.log('[scanButtonListener] clearing previous results from DOM')
     clearResults()
 
     // Create the section headers
+    debug.log('[scanButtonListener] creating DOM headers')
     createHeaders()
 
     // Create the results lists for the folder and license file
+    debug.log('[scanButtonListener] creating lists on DOM for folder and file results')
     createFolderResultsList()
     createLicenseResultsList()
 
     // If the directory exists...
     if (licenseDirExists()) {
+        debug.log('[scanButtonListener] license directory found')
 
         // Set the success message
+        debug.log('[scanButtonListener] adding success list item')
         addListItem('folder', 'Folder present!', 'green-text')
 
         if (!checkFolderCase()) {
-            console.log('capital L detected')
+            debug.log('[scanButtonListener] capital "L" found in licenses directory, adding warning')
             addListItem('folder', 'Capital L detected in "licenses" folder; Please use all lowercase', 'red-text')
         } else {
+            debug.log('[scanButtonListener] lowercase "l" found in licenses directory, adding success message')
             addListItem('folder', 'Folder spelling and capitalization correct!', 'green-text')
         }
 
-        // Get the directory path
-        let directoryPath = getLicenseDirPath()
-
         // Check that the license exists and get the path
+        debug.log('[scanButtonListener] checking for existence of license files')
         let exists = licenseFileExists()
 
         // If the license exists...
         if (exists) {
+            debug.log('[scanButtonListener] license file(s) found!')
 
             // Set the success message
             addListItem('file', 'License file present!', 'green-text')
 
             // Read the licenses and display their contents
+            debug.log('[scanButtonListener] reading license files')
             let licenses = getLicenseFiles()
 
+            debug.log('[scanButtonListener] displaying license contents on DOM')
             displayLicenses(getLicenseDirPath(), licenses)
-            // for (let license of licenses) {
-            //     let values = readLicenseFile(path.join(directoryPath, license))
-            //     displayLicenseContents(values)
-            // }
 
         } else {
-            // setLicenseExists(false)
+            debug.log('[scanButtonListener] no license files were found')
             addListItem('file', 'License file not found!', 'red-text')
         }
     } else {
-
+        debug.log('[scanButtonListener] "licenses" directory not found, checking for alternate spellings')
         let spelling = checkSpelling()
 
         if (!spelling) {
+            debug.log('[scanButtonListener] no alternate spellings found')
             // Otherwise, set the failure message
             addListItem('folder', '"licenses" directory not found!', 'red-text')
             addListItem('file', 'License file not found!', 'red-text')
         } else {
             // Licenses folder exists, but is spelled incorrectly
-            console.log('folder spelled incorrectly')
+            debug.log('[scanButtonListener] alternate spelling found, displaying warning')
             addListItem('folder', `Folder spelled incorrectly; Please change from "${spelling}" to "licenses"`, 'red-text')
             let dirPath = getParentDir(getLicenseDirPath()) + path.sep + spelling
-            console.log(dirPath)
+            
+            debug.log(`[scanButtonListener] scanning for license files in ${dirPath}`)
             let contents = fs.readdirSync(dirPath).filter(f => f.endsWith('.lic') || f.endsWith('.config'))
+            debug.log('[scanButtonListener] contents found:')
+            debug.print(contents)
 
-            displayLicenses(dirPath, contents)
-            // if (contents.length) {
-            //     console.log(contents.length)
-            //     if (contents.length > 1) {
-            //         addListItem('file', 'Multiple license files found; This may cause conflicts.', 'red-text')
-            //     } else {
-            //         addListItem('file', 'Single license file found; No chance of conflicts.', 'green-text')
-            //     }
-
-            //     for (let license of contents) {
-            //         let values = readLicenseFile(path.join(dirPath, license))
-            //         displayLicenseContents(values)
-            //     }
-            // } else {
-            //     addListItem('file', 'No license file found!', 'red-text')
-            // }
-            console.log(spelling)
+            if (contents.length) {
+                debug.log('[scanButtonListener] displaying licenses on DOM')
+                displayLicenses(dirPath, contents)
+            }
         }
     }
+
+    debug.log('[scanButtonListener] stopping spin animation')
+    stopSpinner()
 })
