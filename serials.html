@@ -26,28 +26,11 @@
         </div>
     </nav>
     <div class="container">
-        <div class="row">
-            <div class="col s12">
-                <h3>License Scanner</h3>
-                <p>Use this tool to ensure your machine is properly set up with the client license file (typically named 'redgiant.client-primary.lic')</p>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col s12">
-                <p>This file must be located in the correct folder to work:</p>
-                <ul>
-                    <li><strong>Windows: </strong>C:\ProgramData\Red Giant\licenses</li>
-                    <li><strong>Mac: </strong>/Users/Shared/Red Giant/licenses</li>
-                </ul>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col s12 center">
-                <button id="scan-button" class="waves-effect waves-light btn-large"><i class="material-icons right">folder_open</i>Scan</button>
-            </div>
-        </div>
-        <div class="row" id="scan-results"></div>
+        <h3>Serial Management</h3>
+        <p>If you used serial numbers to license your Red Giant products and would like to use a floating license server or a web-based subscription, you can use these utilities to remove the old serial numbers.</p>
+        <button class="btn waves-effect" id="remove-serials-button">Remove Serials</button>
+        <div id="results"></div>
     </div>
-    <script src="assets/js/license-scan.js"></script>
+    <script src="assets/js/serials.js"></script>
 </body>
 </html>
