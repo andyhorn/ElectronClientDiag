@@ -5,7 +5,8 @@ const debug = require('./assets/js/debug.js')
 const fs = require('fs')
 const { ipcRenderer } = require('electron')
 
-submitButton.addEventListener('click', listener)
+// submitButton.addEventListener('click', listener)
+document.getElementById('license-form').addEventListener('submit', listener)
 
 function listener(e) {
     e.preventDefault()
