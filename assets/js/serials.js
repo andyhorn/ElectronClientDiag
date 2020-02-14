@@ -111,6 +111,7 @@ function runRgDeploy() {
                 debug.log('[runRgDeploy] system error:')
                 debug.print(stderr)
             }
+            setStatus('Failed.')
         } else {
             debug.log('[runRgDeploy] command executed successfully')
             setStatus('Success!')
