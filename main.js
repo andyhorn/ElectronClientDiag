@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, screen, dialog } = require('electron')
+const { app, BrowserWindow, ipcMain, screen, dialog, Menu } = require('electron')
 const path = require('path')
 const url = require('url')
 const fs = require('fs')
@@ -6,7 +6,7 @@ const debug = require('./assets/js/debug.js')
 
 let mainWindow
 
-process.env.NODE_ENV = 'development'
+process.env.NODE_ENV = 'production'
 
 function createMainWindow() {
     debug.log(`getting current screen dimensions...`)
@@ -28,6 +28,7 @@ function createMainWindow() {
     mainWindow.on('closed', () => {
         debug.log(`main window closed, quitting application`)
         app.quit()
+        mainWindow = null
     })
 
     debug.log(`loading landing page HTML`)
@@ -45,6 +46,8 @@ function createMainWindow() {
 
 app.on('ready', () => {
     debug.log(`application loaded and ready to display main window`)
+    const mainMenu = Menu.buildFromTemplate(menuTemplate)
+    Menu.setApplicationMenu(mainMenu)
     createMainWindow()
 })
 
@@ -84,3 +87,40 @@ ipcMain.on('license:save', (e, data) => {
         debug.log(`user canceled save process`)
     }
 })
+
+const menuTemplate = [
+    {
+        label: 'File',
+        submenu: [
+            {
+                label: 'Quit',
+                accelerator: process.platform == 'darwin' ? 'Command+Q' : 'Ctrl+Q',
+                click() {
+                    app.quit()
+                }
+            }
+        ]
+    }
+]
+
+if (process.platform == 'darwin'){
+    menuTemplate.unshift({})
+}
+
+if (process.env.NODE_ENV != 'production') {
+    menuTemplate.push({
+        label: 'Developer Tools',
+        submenu: [
+            {
+                label: 'Toggle DevTools',
+                accelerator: process.platform == 'darwin' ? 'Command+I' : 'Ctrl+I',
+                click(item, focusedWindow) {
+                    focusedWindow.toggleDevTools()
+                }
+            },
+            {
+                role: 'reload'
+            }
+        ]
+    })
+}
