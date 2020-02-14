@@ -13,6 +13,22 @@ function clearResults() {
     resultsElement.innerHTML = ''
 }
 
+function configToLic(filepath, warningDiv) {
+    let filename = filepath.slice(0, filepath.indexOf('.config'))
+    let newName = filename + '.lic'
+    fs.renameSync(filepath, newName)
+    if (fs.existsSync(newName) && !fs.existsSync(filepath)) {
+        processLicenses()
+    } else {
+        let errorDiv = document.createElement('div')
+        let errorMessage = document.createElement('p')
+        errorMessage.textContent = 'Unable to fix license, please manually rename.'
+        errorMessage.classList.add('red-text')
+        errorDiv.appendChild(errorMessage)
+        warningDiv.appendChild(errorDiv)
+    }
+}
+
 function createHeaders() {
     debug.log('[createHeaders] creating headers')
     folderCol = document.createElement('div')
@@ -199,7 +215,7 @@ function makeTestButton(host, port) {
     let button = document.createElement('button')
     button.classList.add('btn-small')
     button.classList.add('waves-effect')
-    button.classList.add('right')
+    button.classList.add('mx-1')
 
     button.setAttribute('data-host', host)
     button.setAttribute('data-port', port)
@@ -246,9 +262,20 @@ function displayLicenseContents(license) {
     if (license.name.endsWith('config')) {
         debug.log(`[displayLicenseContents] .config file detected, adding warning`)
         let warning = document.createElement('div')
+        warning.id = `"${license.name}"`
         warning.innerHTML = '<strong>Warning: </strong>".config" files may not be supported, please change to ".lic"'
         warning.classList.add('red-text')
-        warning.classList.add('px-2')
+        warning.classList.add('p-2')
+        warning.classList.add('center')
+        let fixButton = document.createElement('button')
+        fixButton.innerText = 'Fix'
+        fixButton.classList.add('btn-small')
+        fixButton.classList.add('waves-effect')
+        fixButton.classList.add('right')
+        fixButton.addEventListener('click', () => {
+            configToLic(license.name, warning)
+        })
+        listItem.appendChild(fixButton)
         listItem.appendChild(warning)
     }
 
@@ -309,7 +336,7 @@ function stopSpinner() {
     button.classList.remove('spin')
 }
 
-document.getElementById('scan-button').addEventListener('click', () => {
+function processLicenses() {
     debug.log(`[scanButtonListener] beginning scan process...`)
     debug.log('[scanButtonListener] starting spin icon')
     startSpinner()
@@ -394,4 +421,6 @@ document.getElementById('scan-button').addEventListener('click', () => {
 
     debug.log('[scanButtonListener] stopping spin animation')
     stopSpinner()
-})
+}
+
+document.getElementById('scan-button').addEventListener('click', processLicenses)
