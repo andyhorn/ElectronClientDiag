@@ -6,15 +6,24 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "package-mac": "electron-packager . --overwrite --platform=darwin --arch=x64 --icon=assets/icons/mac/icon.icns --prune=true --out=release-builds",
-    "package-win": "electron-packager . redgiant_client_tools --overwrite --platform=win32 --arch=ia32 --icon=assets/icons/win/icon.ico --prune=true --out=release-builds --version-string.ProductName=\"Red Giant Client Tools\"",
-    "package-linux": "electron-packager . redgiant_client_tools --overwrite --platform=linux --arch=x64 --icon=assets/icons/png/icon.png --prune=true --out=release-builds"
+    "dist": "electron-builder build"
   },
   "author": "Andy Horn",
   "license": "ISC",
+  "build": {
+    "appId": "com.redgiant.clienttools",
+    "mac": {
+      "target": "default",
+      "icon": "./assets/icons/mac/icon.icns"
+    },
+    "win": {
+      "target": ["nsis", "portable"],
+      "icon": "./assets/icons/win/icon.ico"
+    }
+  },
   "devDependencies": {
     "electron": "^8.0.0",
-    "electron-packager": "^14.2.1"
+    "electron-builder": "^22.3.2"
   },
   "dependencies": {
     "sudo-prompt": "^9.1.1"
